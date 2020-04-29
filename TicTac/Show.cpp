@@ -1,6 +1,6 @@
 #include <iostream>
 #include <windows.h>
-#include "Game.h"
+#include "Structs.h"
 
 using namespace std;
 
@@ -75,6 +75,7 @@ void ShowX(size_t cellX, size_t cellY) {
 	size_t x = (cellX * 6) - 3;
 	size_t y = (cellY * 6) - 3;
 	ShowChar(x, y, (char)254);
+	cout << ' ';
 	ShowChar(x - 1, y - 1, (char)254);
 	ShowChar(x - 2, y - 2, (char)254);
 	ShowChar(x + 1, y + 1, (char)254);
@@ -93,6 +94,8 @@ void ShowO(size_t cellX, size_t cellY) {
 	//  O O O 
 	size_t x = (cellX * 6) - 3;
 	size_t y = (cellY * 6) - 3;
+	ShowChar(x, y, ' ');
+	cout << ' ';
 	ShowChar(x - 1, y - 2, (char)254);
 	ShowChar(x,		y - 2, (char)254);
 	ShowChar(x + 1, y - 2, (char)254);
@@ -150,7 +153,6 @@ void ShowCursor(Cell** showField, Cursor cursor) {
 		ShowO(cursor.lastX, cursor.lastY);
 	else {
 		COORD cord;
-		//1 unit = 0.5 width and 1 height
 		cord.X = cursor.lastX * 12 - 6;
 		cord.Y = cursor.lastY * 6 - 3;
 
@@ -165,4 +167,36 @@ void ShowArr(Cell** arr, size_t size) {
 			cout << (int)arr[i][j] << " ";
 		cout << endl;
 	}
+}
+
+void ShowLogo() {
+	
+}
+
+void ShowCurrentSymb(Step step) {
+	ShowChar(7, 20, ' ');
+	cout << "                ";
+	ShowChar(7, 20, ' ');
+	if (step.currentSymb == Cell::PLAYER_1)
+		cout << "Now: X\n";
+	else if (step.currentSymb == Cell::PLAYER_2)
+		cout << "Now: O\n";
+}
+
+void ShowWinner(Winner winner, Game game) {
+	ShowChar(5, 20, ' ');
+	if (winner == Winner::PLAYER_1) {
+		if ((int)winner == (int)game.player1.player)
+			cout << game.player1.name << " win!!!\n";
+		else 
+			cout << game.player2.name << " win!!!\n";
+	}
+	else if (winner == Winner::PLAYER_2) {
+		if ((int)winner == (int)game.player1.player)
+			cout << game.player1.name << " win!!!\n";
+		else
+			cout << game.player2.name << " win!!!\n";
+	}
+	else if (winner == Winner::DRAW)
+		cout << "     DRAW!!!        \n";
 }

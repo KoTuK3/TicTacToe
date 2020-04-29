@@ -2,7 +2,6 @@
 void ShowTable();
 void ShowCursor(Cell** showField, Cursor cursor);
 void UpdateField(Cell** gameField, Cell** showField, size_t size);
+void ShowCurrentSymb(Step step);
+void ShowWinner(Winner winner, Game game);
 
-//Test
-void ShowX(size_t cellX, size_t cellY);
-void ShowArr(Cell** arr, size_t size);
