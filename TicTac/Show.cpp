@@ -169,13 +169,9 @@ void ShowArr(Cell** arr, size_t size) {
 	}
 }
 
-void ShowLogo() {
-	
-}
-
 void ShowCurrentSymb(Step step) {
 	ShowChar(7, 20, ' ');
-	cout << "                ";
+	cout << "                   ";
 	ShowChar(7, 20, ' ');
 	if (step.currentSymb == Cell::PLAYER_1)
 		cout << "Now: X\n";
@@ -187,16 +183,50 @@ void ShowWinner(Winner winner, Game game) {
 	ShowChar(5, 20, ' ');
 	if (winner == Winner::PLAYER_1) {
 		if ((int)winner == (int)game.player1.player)
-			cout << game.player1.name << " win!!!\n";
+			cout << game.player1.name << " win!!!";
 		else 
-			cout << game.player2.name << " win!!!\n";
+			cout << game.player2.name << " win!!!";
 	}
 	else if (winner == Winner::PLAYER_2) {
 		if ((int)winner == (int)game.player1.player)
-			cout << game.player1.name << " win!!!\n";
+			cout << game.player1.name << " win!!!";
 		else
-			cout << game.player2.name << " win!!!\n";
+			cout << game.player2.name << " win!!!";
 	}
 	else if (winner == Winner::DRAW)
-		cout << "     DRAW!!!        \n";
+		cout << "     DRAW!!!";
+	cout << "        \n";
+}
+
+void ShowLogo() {
+	system("cls");
+	const size_t HEIGHT = 7;
+	const size_t WIDTH = 16;
+	char symb = 219;
+	char logo[HEIGHT][WIDTH];
+	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(handle, 0xC);
+
+	strcpy_s(logo[0], "#     #   ###  ");
+	strcpy_s(logo[1], "##   ##  #   # ");
+	strcpy_s(logo[2], " ## ##  #     #");
+	strcpy_s(logo[3], "  ###   #     #");
+	strcpy_s(logo[4], " ## ##  #     #");
+	strcpy_s(logo[5], "##   ##  #   # ");
+	strcpy_s(logo[6], "#     #   ###  ");
+
+	cout << "\n\n\n";
+	for (size_t i = 0; i < HEIGHT; i++) {
+		cout << '\t';
+		for (size_t j = 0; j < WIDTH; j++) {
+			if (logo[i][j] == '#')
+				cout << symb << symb;
+			else
+				cout << "  ";
+		}
+		cout << endl;
+	}
+	SetConsoleTextAttribute(handle, 0xF);
+
+	cout << "\n\n\t   Press any key to start\n";
 }

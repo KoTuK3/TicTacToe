@@ -43,6 +43,7 @@ struct Game {
 	Complexity complexity = Complexity::NOTHING;
 	Player player1;
 	Player player2;
+	bool isExit = false;
 };
 
 struct Step {

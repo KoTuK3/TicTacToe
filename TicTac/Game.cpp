@@ -132,8 +132,20 @@ void PlayPVC(Game gameSettings) {
 
 	ShowTable();
 	do {
-		if (step.currentSymb != gameSettings.player1.player)
-			HardMod(gameField, size, gameSettings, step);
+		if (step.currentSymb != gameSettings.player1.player) {
+			switch (gameSettings.complexity) {
+			case Complexity::EASY:
+				EasyMod(gameField, step);
+				break;
+			case Complexity::MIDDLE:
+				MiddleMod(gameField, step);
+				break;
+			case Complexity::HARD:
+				HardMod(gameField, size, gameSettings, step);
+				break;
+			}
+		}
+			
 		else
 			Moves(cursor, gameField, size, step);
 		UpdateField(gameField, showField, size);
@@ -179,6 +191,7 @@ void EasyMod(Cell** gameField, Step& step) {
 		x = rand() % 3;
 		y = rand() % 3;
 	} while (gameField[y][x] != Cell::VOID_CELL);
+	Sleep(100);
 	gameField[y][x] = step.currentSymb;
 	NextStep(step);
 }
@@ -196,6 +209,7 @@ void MiddleMod(Cell** gameField, Step& step) {
 			if (localField[i][j] == Cell::VOID_CELL) {
 				localField[i][j] = (step.currentSymb == Cell::PLAYER_1 ? Cell::PLAYER_2 : Cell::PLAYER_1);
 				if (CheckWin(localField, size) != Winner::NOTHING) {
+					Sleep(100);
 					gameField[i][j] = step.currentSymb;
 					NextStep(step);
 					return;
@@ -300,6 +314,7 @@ void HardMod(Cell** gameField, size_t size, Game gameSetting, Step& step) {
 			}
 		}
 	}
+	Sleep(100);
 	gameField[bestMove.y][bestMove.x] = gameSetting.player2.player;
 	NextStep(step);
 }

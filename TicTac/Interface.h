@@ -3,3 +3,4 @@
 #include "structs.h";
 
 Game GetGameSettings();
+bool isExit();
