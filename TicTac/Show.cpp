@@ -4,7 +4,7 @@
 
 using namespace std;
 
-void hideCursor() {
+void HideCursor() {
 	CONSOLE_CURSOR_INFO structCursorInfo;
 	GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &structCursorInfo);
 	structCursorInfo.bVisible = FALSE;
@@ -22,11 +22,13 @@ void ShowChar(size_t x, size_t y, char character) {
 }
 
 void ShowTable() {
-	hideCursor();
+	//Виводить табличку використовуючи символи з таблиці ASCII
+	HideCursor();
 	system("cls");
 	size_t height = 19;
 	size_t width = height * 2 - 1;
-
+	// У if-ах і, j порівнюється з розмірами і ділиться націло на розміри
+	// Розмір вимірюється в символах(мінімальна одиниця в консолі).
 	for (size_t i = 0; i < height; i++) {
 		for (size_t j = 0; j < width; j++) {
 			// Upper left corner
@@ -64,9 +66,12 @@ void ShowTable() {
 		}
 		cout << endl;
 	}
+	ShowChar(21, 2, ' ');
+	cout << "Use WASD to move and Enter to place a mark";
 }
 
 void ShowX(size_t cellX, size_t cellY) {
+	// Виводить Х використовуючи символ з таблиці ASCII під номером 254
 	//X       X
 	//  X   X
 	//    X
@@ -87,6 +92,7 @@ void ShowX(size_t cellX, size_t cellY) {
 }
 
 void ShowO(size_t cellX, size_t cellY) {
+	// Виводить O використовуючи символ з таблиці ASCII під номером 254
 	//  O O O 
 	//O       O
 	//O       O
@@ -143,8 +149,7 @@ void ShowCursor(Cell** showField, Cursor cursor) {
 		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cord);
 		cout << (char)176 << (char)176;
 	}
-
-	
+		
 	handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(handle, 0xF);
 	if (showField[cursor.lastY - 1][cursor.lastX - 1] == Cell::PLAYER_1)
@@ -158,14 +163,6 @@ void ShowCursor(Cell** showField, Cursor cursor) {
 
 		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cord);
 		cout << "  ";
-	}
-}
-//Test
-void ShowArr(Cell** arr, size_t size) {
-	for (size_t i = 0; i < size; i++) {
-		for (size_t j = 0; j < size; j++)
-			cout << (int)arr[i][j] << " ";
-		cout << endl;
 	}
 }
 

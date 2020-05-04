@@ -9,6 +9,7 @@ using namespace std;
 int main() {
 	srand(time(nullptr));
 	Game gameSettings;
+
 	ShowLogo();
 	_getch();
 
@@ -23,7 +24,7 @@ int main() {
 			PlayPVP(gameSettings);
 			break;
 		}
-	} while (isExit());
+	} while (IsExit());
 
 	return 0;
 }

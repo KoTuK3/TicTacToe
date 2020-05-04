@@ -3,4 +3,5 @@
 #include "structs.h";
 
 Game GetGameSettings();
-bool isExit();
+bool IsExit();
+int Selector(char header[], char menu[][50], size_t menuSize, bool hasExit, bool hasRefresh);

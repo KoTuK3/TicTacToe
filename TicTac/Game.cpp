@@ -11,7 +11,11 @@ Cell** CreateField(size_t size) {
 }
 
 void ChangeCell(Cell** field, size_t size, size_t x, size_t y, Cell cellValue) {
-	if (x <= size && x > 0 && y <= size && y > 0 && field[y - 1][x - 1] == Cell::VOID_CELL)
+	// Перевірка чи курсор знаходиться в межах поля
+	// а також перевіряється чи вибрана клітинка пуста
+	if (x <= size && x > 0 &&
+		y <= size && y > 0 && 
+		field[y - 1][x - 1] == Cell::VOID_CELL)
 		field[y - 1][x - 1] = cellValue;
 }
 
@@ -19,7 +23,6 @@ void DeleteField(Cell** field, size_t size) {
 	for (size_t i = 0; i < size; i++)
 		delete[] field[i];
 	delete[] field;
-	field = nullptr;
 }
 
 void Moves(Cursor& cursor, Cell** gameField, size_t size, Step& step) {
@@ -56,6 +59,8 @@ void Moves(Cursor& cursor, Cell** gameField, size_t size, Step& step) {
 		//Enter
 		case 13:
 			if (gameField[cursor.y - 1][cursor.x - 1] == Cell::VOID_CELL) {
+				// Міняємо значення тільки тоді, коли клітинка пуста, іначе ігноруєм Ентер
+				// Значення береться зі структури Step
 				ChangeCell(gameField, size, cursor.x, cursor.y, step.currentSymb);
 				NextStep(step);
 			}
@@ -65,6 +70,15 @@ void Moves(Cursor& cursor, Cell** gameField, size_t size, Step& step) {
 }
 
 Winner CheckWin(Cell** gameField, size_t size) {
+	// У нас є 3 положення клітинки: пуста, Х, О.
+	// При переведенні клітинки з перечислення в int
+	// ми отримаємо 0, 1, 2. Отже коли є хоча б одна пуста клітинка
+	// при перемноженні рядка, стовпчика або діагоналі ми отримаємо 0.
+	// В іншому випадку коли всі елементи співпали ми отримаємо 1 або 8	
+	// в залежності від значеннь рядка, стовпця або діагоналі.
+	// В інших виипадках ми ці значення не отримаємо, отже 
+	// нам необхідно і достатньо перемножити всі рядки, стовпці і діагоналі.
+
 	int diagonal1 = 1,
 		diagonal2 = 1;
 
@@ -96,10 +110,16 @@ Winner CheckWin(Cell** gameField, size_t size) {
 }
 
 void PlayPVP(Game gameSettings) {
+	// Розмір поля
 	size_t size = 3;
 	Cursor cursor;
+	// 2 поля створенні для того, щоб на одному виконувати ігрові дії
+	// за допомогою другого відображати поле.
+	// Для того щоб перемальовувати лише ті елементи, які були змінені
+	// потрібно поле showField.
 	Cell** showField = CreateField(size);
 	Cell** gameField = CreateField(size);
+
 	Step step;
 	int firstPlayer = rand() % 2;
 	step.currentSymb = (firstPlayer == 0 ? gameSettings.player1.player : gameSettings.player2.player);
@@ -121,8 +141,13 @@ void PlayPVP(Game gameSettings) {
 }
 
 void PlayPVC(Game gameSettings) {
+	// Розмір поля
 	size_t size = 3;
 	Cursor cursor;
+	// 2 поля створенні для того, щоб на одному виконувати ігрові дії
+	// за допомогою другого відображати поле.
+	// Для того щоб перемальовувати лише ті елементи, які були змінені
+	// потрібно поле showField.
 	Cell** showField = CreateField(size);
 	Cell** gameField = CreateField(size);
 	Step step;
@@ -133,14 +158,16 @@ void PlayPVC(Game gameSettings) {
 	ShowTable();
 	do {
 		if (step.currentSymb != gameSettings.player1.player) {
-			switch (gameSettings.complexity) {
-			case Complexity::EASY:
-				EasyMod(gameField, step);
+			switch (gameSettings.difficulty) {
+			case Difficulty::EASY:
+				EasyMod(gameField, size, step);
 				break;
-			case Complexity::MIDDLE:
-				MiddleMod(gameField, step);
+			case Difficulty::MIDDLE:
+				MiddleMod(gameField, size, step);
 				break;
-			case Complexity::HARD:
+			case Difficulty::HARD:
+				// У HardMod потрібно передавати налаштування гри для того щоб 
+				// алгоритм міг визначити хто якими знаками грає.
 				HardMod(gameField, size, gameSettings, step);
 				break;
 			}
@@ -154,6 +181,7 @@ void PlayPVC(Game gameSettings) {
 		Sleep(100);
 		winner = CheckWin(gameField, size);
 	} while (winner == Winner::NOTHING);
+
 	ShowWinner(winner, gameSettings);
 
 	DeleteField(gameField, size);
@@ -185,44 +213,46 @@ void NextStep(Step& step) {
 	step.currentStep++;
 }
 
-void EasyMod(Cell** gameField, Step& step) {
+void EasyMod(Cell** gameField, size_t size, Step& step) {
 	size_t x, y;
 	do {
-		x = rand() % 3;
-		y = rand() % 3;
+		x = rand() % size;
+		y = rand() % size;
 	} while (gameField[y][x] != Cell::VOID_CELL);
 	Sleep(100);
 	gameField[y][x] = step.currentSymb;
 	NextStep(step);
 }
 
-void MiddleMod(Cell** gameField, Step& step) {
-	size_t size = 3;
-	Cell** localField = CreateField(size);
-	for (size_t i = 0; i < size; i++)
-		for (size_t j = 0; j < size; j++)
-			localField[i][j] = gameField[i][j];
-
+void MiddleMod(Cell** gameField, size_t size, Step& step) {
+	// В цьому алгоритмі ми перебираємо всі ходи гравця
+	// і якщо в якомусь з них гравець виграє ми ставимо блок
+	// іначе вибираємо рандомно
 	
 	for (size_t i = 0; i < size; i++) {
 		for (size_t j = 0; j < size; j++) {
-			if (localField[i][j] == Cell::VOID_CELL) {
-				localField[i][j] = (step.currentSymb == Cell::PLAYER_1 ? Cell::PLAYER_2 : Cell::PLAYER_1);
-				if (CheckWin(localField, size) != Winner::NOTHING) {
+			if (gameField[i][j] == Cell::VOID_CELL) {
+				gameField[i][j] = (step.currentSymb == Cell::PLAYER_1 ? Cell::PLAYER_2 : Cell::PLAYER_1);
+				if (CheckWin(gameField, size) != Winner::NOTHING) {
 					Sleep(100);
 					gameField[i][j] = step.currentSymb;
 					NextStep(step);
 					return;
 				}
-				localField[i][j] = Cell::VOID_CELL;
+				gameField[i][j] = Cell::VOID_CELL;
 			}
 		}
 	}
 
-	EasyMod(gameField, step);
+	EasyMod(gameField, size, step);
 }
 
 int Score(Cell** gameField, Game gameSetting) {
+	// У цій функції ми перевіряємо хто виграв і
+	// в залежності від цього повертаємо значення.
+	// Це потрібно для алгоритму minimax, щоб він вибирав
+	// хід ймовірністю перемоги.
+
 	//If win computer return +10
 	//If win player return -10
 	size_t size = 3;
@@ -239,11 +269,11 @@ int Score(Cell** gameField, Game gameSetting) {
 			return -10;
 		else if (gameSetting.player2.player == Cell::PLAYER_1)
 			return 10;
-	}
-	
+	}	
 }
 
 int MaxSearch(Cell** gameField, size_t size, Game gameSetting) {
+	// Шукає найкращий хід комп'ютера
 	if (CheckWin(gameField, size) != Winner::NOTHING)
 		return Score(gameField, gameSetting);
 	Move bestMove;
@@ -268,6 +298,7 @@ int MaxSearch(Cell** gameField, size_t size, Game gameSetting) {
 }
 
 int MinSearch(Cell** gameField, size_t size, Game gameSetting) {
+	// Шукає найкращий хід гравця(найгірший для комп'ютера)
 	if (CheckWin(gameField, size) != Winner::NOTHING)
 		return Score(gameField, gameSetting);
 	Move bestMove;
@@ -292,9 +323,11 @@ int MinSearch(Cell** gameField, size_t size, Game gameSetting) {
 }
 
 void HardMod(Cell** gameField, size_t size, Game gameSetting, Step& step) {
+	// Функція HardMod вибирає найкращий хід перебравши всі можливі варіанти.
 	int bestMoveScore = 100;
 	Move bestMove;
 	if (step.currentStep == 0) {
+		// для першого кроку завжди ставиться знак в центр
 		gameField[1][1] = gameSetting.player2.player;
 		NextStep(step);
 		return;
